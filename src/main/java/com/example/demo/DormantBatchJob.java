@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import com.example.demo.batch.BatchStatus;
+import com.example.demo.batch.JobExecution;
 import com.example.demo.customer.Customer;
 import com.example.demo.customer.CustomerRepository;
 import lombok.Data;
@@ -21,42 +23,62 @@ public class DormantBatchJob {
         this.emailProvider = new EmailProvider.Fake();
     }
 
-    public void execute() {
+    public JobExecution execute() {
+
+        final JobExecution jobExecution = new JobExecution();
+        jobExecution.setStatus(BatchStatus.STARTING);
+        jobExecution.setStartTime(LocalDateTime.now());
 
         int pageNo = 0;
 
-        while (true){
+        try {
 
-            // 1. 유저를 조회한다.
-            PageRequest pageRequest = PageRequest.of(pageNo, 1, Sort.by("id").ascending());
-            Page<Customer> page = customerRepository.findAll(pageRequest);
+            while (true){
 
-            final Customer customer;
-            if(page.isEmpty()){
-                break;
+                // 1. 유저를 조회한다.
+                PageRequest pageRequest = PageRequest.of(pageNo, 1, Sort.by("id").ascending());
+                Page<Customer> page = customerRepository.findAll(pageRequest);
+
+                final Customer customer;
+                if(page.isEmpty()){
+                    break;
+                }
+                else {
+                    pageNo++;
+                    customer = page.getContent().get(0);
+                }
+
+                // 2. 휴면계정 대상을 추출 및 변환한다.
+                boolean isDormantTarget = LocalDateTime.now()
+                        .minusDays(365)
+                        .isAfter(customer.getLoginAt());
+
+                if(isDormantTarget){
+                    customer.setStatus(Customer.Status.DORMANT);
+                }else {
+                    continue;
+                }
+
+                // 3. 휴면계정으로 상태를 변경한다.
+                customerRepository.save(customer);
+
+                // 4. 메일을 보낸다.
+                emailProvider.send(customer.getEmail(), "휴면 전환 안내 메일", "내용");
             }
-            else {
-                pageNo++;
-                customer = page.getContent().get(0);
-            }
+            jobExecution.setStatus(BatchStatus.COMPLETED);
 
-            // 2. 휴면계정 대상을 추출 및 변환한다.
-            boolean isDormantTarget = LocalDateTime.now()
-                    .minusDays(365)
-                    .isAfter(customer.getLoginAt());
-
-            if(isDormantTarget){
-                customer.setStatus(Customer.Status.DORMANT);
-            }else {
-                continue;
-            }
-
-            // 3. 휴면계정으로 상태를 변경한다.
-            customerRepository.save(customer);
-
-            // 4. 메일을 보낸다.
-            emailProvider.send(customer.getEmail(), "휴면 전환 안내 메일", "내용");
+        } catch (Exception e) {
+            jobExecution.setStatus(BatchStatus.FAILED);
         }
+
+        jobExecution.setEndTime(LocalDateTime.now());
+
+        emailProvider.send(
+                "admin@test.com",
+                "배치 완료 알림",
+                "배치 작업 수행, status : " + jobExecution.getStatus());
+
+        return jobExecution;
     }
 
 }

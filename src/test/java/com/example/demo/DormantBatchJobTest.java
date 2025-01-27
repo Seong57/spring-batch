@@ -1,5 +1,7 @@
 package com.example.demo;
 
+import com.example.demo.batch.BatchStatus;
+import com.example.demo.batch.JobExecution;
 import com.example.demo.customer.Customer;
 import com.example.demo.customer.CustomerRepository;
 import org.assertj.core.api.Assertions;
@@ -43,7 +45,7 @@ class DormantBatchJobTest {
         saveCustomer(364);
 
         // when
-        dormantBatchJob.execute();
+        JobExecution result = dormantBatchJob.execute();
 
         // then
         final long dormantCount = customerRepository.findAll()
@@ -52,6 +54,7 @@ class DormantBatchJobTest {
                 .count();
 
         Assertions.assertThat(dormantCount).isEqualTo(3);
+        Assertions.assertThat(result.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     }
 
     @Test
@@ -71,7 +74,7 @@ class DormantBatchJobTest {
         saveCustomer(1);
 
         // when
-        dormantBatchJob.execute();
+        JobExecution result = dormantBatchJob.execute();
 
         // then
         final long dormantCount = customerRepository.findAll()
@@ -80,6 +83,7 @@ class DormantBatchJobTest {
                 .count();
 
         Assertions.assertThat(dormantCount).isEqualTo(0);
+        Assertions.assertThat(result.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     }
 
     @Test
@@ -87,7 +91,7 @@ class DormantBatchJobTest {
     void test3() {
 
         // when
-        dormantBatchJob.execute();
+        JobExecution result = dormantBatchJob.execute();
 
         // then
         final long dormantCount = customerRepository.findAll()
@@ -96,6 +100,21 @@ class DormantBatchJobTest {
                 .count();
 
         Assertions.assertThat(dormantCount).isEqualTo(0);
+        Assertions.assertThat(result.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+    }
+
+    @Test
+    @DisplayName("배치가 실패하면 BatchStatus는 FAILED를 반환해야 한다.")
+    void test4() {
+
+        //given
+        DormantBatchJob dormantBatchJob = new DormantBatchJob(null);
+
+        // when
+        JobExecution result = dormantBatchJob.execute();
+
+        // then
+        Assertions.assertThat(result.getStatus()).isEqualTo(BatchStatus.FAILED);
     }
 
     private void saveCustomer(long loginMinusDays) {
