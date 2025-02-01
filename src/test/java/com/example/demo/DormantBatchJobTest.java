@@ -1,8 +1,8 @@
 package com.example.demo;
 
 import com.example.demo.batch.BatchStatus;
-import com.example.demo.batch.Job;
 import com.example.demo.batch.JobExecution;
+import com.example.demo.batch.TaskletJob;
 import com.example.demo.customer.Customer;
 import com.example.demo.customer.CustomerRepository;
 import org.assertj.core.api.Assertions;
@@ -22,7 +22,7 @@ class DormantBatchJobTest {
     private CustomerRepository customerRepository;
 
     @Autowired
-    private Job dormantBatchJob;
+    private TaskletJob dormantBatchJob;
 
     @BeforeEach
     public void setup(){
@@ -107,7 +107,7 @@ class DormantBatchJobTest {
     void test4() {
 
         //given
-        Job dormantBatchJob = new Job(null, null);
+        TaskletJob dormantBatchJob = new TaskletJob(null, null);
 
         // when
         JobExecution result = dormantBatchJob.execute();
