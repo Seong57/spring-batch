@@ -40,6 +40,7 @@ public class TaskletJob implements Job {
         jobExecutionListener.beforeJob(jobExecution);
 
 
+
         try {
             // 비즈니스 로직
             tasklet.execute();
