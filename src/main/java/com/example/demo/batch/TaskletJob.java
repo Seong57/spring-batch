@@ -39,6 +39,7 @@ public class TaskletJob implements Job {
         // 전처리
         jobExecutionListener.beforeJob(jobExecution);
 
+
         try {
             // 비즈니스 로직
             tasklet.execute();
