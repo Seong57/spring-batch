@@ -1,2 +1,2 @@
-# spring-batch
-spring batch
+# spring-batch 학습 노트
+원시적인 배치 프로그램 -> 스프링 배치 적용
