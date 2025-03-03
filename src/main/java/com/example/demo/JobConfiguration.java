@@ -17,19 +17,62 @@ public class JobConfiguration {
 
     @Bean
     public Job job(JobRepository jobRepository, Step step){
-        return new JobBuilder("job", jobRepository)
+        return new JobBuilder("job-chunk", jobRepository)
                 .start(step)
                 .build();
     }
 
-
     @Bean
-    public Step step(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
+    public Step step(JobRepository jobRepository,
+                     PlatformTransactionManager platformTransactionManager
+//                     @Value("#{jobParameters['name']}") String name
+    ) {
+//        log.info("name : {}", name);
         return new StepBuilder("step", jobRepository)
-                .tasklet((a, b) -> {
-                    log.info("step");
-                    return RepeatStatus.FINISHED;
-                }, platformTransactionManager)
+                .tasklet((a, b) -> RepeatStatus.FINISHED, platformTransactionManager)
                 .build();
     }
+
+    /*@Bean
+    public Step step(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
+
+        ItemReader<Integer> itemReader = new ItemReader<>() {
+            private int count = 0;
+
+            @Override
+            public Integer read() {
+                count++;
+
+                log.info("Read {}", count);
+
+                if (count == 20) {
+                    return null;
+                }
+
+//                if (count >= 15)
+//                    throw new IllegalStateException("예외 발생");
+
+                return count;
+            }
+        };
+
+        ItemProcessor<Integer, Integer> itemProcessor = new ItemProcessor<>() {
+            @Override
+            public Integer process(Integer item) throws Exception {
+                if (item == 15)
+                    throw new IllegalStateException();
+                return item;
+            }
+        };
+
+        return new StepBuilder("step", jobRepository)
+                .<Integer, Integer>chunk(10, platformTransactionManager)
+                .reader(itemReader)
+                .processor(itemProcessor)
+                .writer(read -> {})
+                .faultTolerant()
+                .retry(IllegalStateException.class)
+                .retryLimit(5)
+                .build();
+    }*/
 }
