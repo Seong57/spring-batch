@@ -6,13 +6,13 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Slf4j
-@Configuration
+//@Configuration
 public class JobConfiguration {
 
     @Bean
@@ -22,7 +22,7 @@ public class JobConfiguration {
                 .build();
     }
 
-    @Bean
+    /*@Bean
     public Step step(JobRepository jobRepository,
                      PlatformTransactionManager platformTransactionManager
 //                     @Value("#{jobParameters['name']}") String name
@@ -31,9 +31,9 @@ public class JobConfiguration {
         return new StepBuilder("step", jobRepository)
                 .tasklet((a, b) -> RepeatStatus.FINISHED, platformTransactionManager)
                 .build();
-    }
+    }*/
 
-    /*@Bean
+    @Bean
     public Step step(JobRepository jobRepository, PlatformTransactionManager platformTransactionManager){
 
         ItemReader<Integer> itemReader = new ItemReader<>() {
@@ -74,5 +74,6 @@ public class JobConfiguration {
                 .retry(IllegalStateException.class)
                 .retryLimit(5)
                 .build();
-    }*/
+    }
+
 }

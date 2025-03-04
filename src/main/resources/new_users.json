@@ -1,0 +1,7 @@
+[
+ {"id":null,"name":"혜인","age":"21","region":"서울","telephone":"010-1111-1111"},
+ {"id":null,"name":"카리나","age":"22","region":"대구","telephone":"010-2222-2222"},
+ {"id":null,"name":"민지","age":"23","region":"대전","telephone":"010-3333-3333"},
+ {"id":null,"name":"해린","age":"24","region":"부산","telephone":"010-4444-4444"},
+ {"id":null,"name":"다니엘","age":"25","region":"평택","telephone":"010-5555-5555"}
+]
